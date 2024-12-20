@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronômetro de Contagem Regressiva</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background: #121212; /* Fundo escuro */
+            font-family: 'Arial', sans-serif;
+            color: #fff; /* Texto branco */
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .countdown {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8); /* Fundo escuro semi-transparente */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            margin-top: 20px;
+        }
+
+        .time {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+
+        .label {
+            font-size: 24px;
+            color: #bbb; /* Cor suave para o texto */
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+            background-color: #333; /* Cor escura para o campo de input */
+            border: 1px solid #444; /* Borda mais suave */
+            color: #fff; /* Texto branco no input */
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #6200ea; /* Cor escura para o botão */
+            border: none;
+            border-radius: 5px;
+            color: #fff; /* Texto branco no botão */
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #3700b3; /* Cor mais escura ao passar o mouse */
+        }
+
+        /* Estilos do relógio analógico */
+        .clock {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background-color: #333; /* Fundo escuro para o relógio */
+            border-radius: 50%;
+            border: 10px solid #fff; /* Borda branca */
+            margin-top: 40px;
+        }
+
+        .clock .hour, .clock .minute, .clock .second {
+            position: absolute;
+            background-color: #fff; /* Cor dos ponteiros */
+            top: 50%;
+            left: 50%;
+            transform-origin: 50% 100%;
+            transform: translate(-50%, -100%);
+            transition-timing-function: steps(1);
+        }
+
+        .clock .hour {
+            width: 6px;
+            height: 50px;
+            background-color: #ff4d4d; /* Cor vermelha para a hora */
+        }
+
+        .clock .minute {
+            width: 4px;
+            height: 70px;
+            background-color: #4dff88; /* Cor verde para o minuto */
+        }
+
+        .clock .second {
+            width: 2px;
+            height: 90px;
+            background-color: #ffeb3b; /* Cor amarela para o segundo */
+        }
+
+        /* Posicionamento do centro do relógio */
+        .clock .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background-color: #fff; /* Centro do relógio em branco */
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+    </style>
+</head>
+<body>
+
+<h1>Cronômetro de Contagem Regressiva</h1>
+<input type="datetime-local" id="dateTimeInput" />
+<button onclick="startCountdown()">Iniciar Contagem</button>
+
+<div class="countdown" id="countdownContainer" style="display: none;">
+    <div class="time" id="countdown"></div>
+    <div class="label">Faltam para:</div>
+</div>
+
+<!-- Relógio Analógico -->
+<div class="clock" id="analogClock">
+    <div class="hour" id="hour"></div>
+    <div class="minute" id="minute"></div>
+    <div class="second" id="second"></div>
+    <div class="center"></div>
+</div>
+
+<script>
+    let countdownInterval;
+    let clockInterval;
+
+    function startCountdown() {
+        // Limpa qualquer contagem anterior
+        clearInterval(countdownInterval);
+        
+        const input = document.getElementById("dateTimeInput").value;
+        if (!input) {
+            alert("Por favor, insira uma data e hora válidas.");
+            return;
+        }
+
+        const countDownDate = new Date(input).getTime();
+        const countdownContainer = document.getElementById("countdownContainer");
+        countdownContainer.style.display = "block";
+
+        // Atualiza o cronômetro a cada segundo
+        countdownInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            // Cálculos para dias, horas, minutos e segundos
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let timeString = "";
+            
+            // Exibe apenas o valor se for maior que zero
+            if (days > 0) timeString += days + "d ";
+            if (hours > 0) timeString += hours + "h ";
+            if (minutes > 0) timeString += minutes + "m ";
+            if (seconds > 0) timeString += seconds + "s ";
+
+            // Exibe o resultado no elemento com o id "countdown"
+            document.getElementById("countdown").innerHTML = timeString;
+
+            // Atualiza o título da aba
+            document.title = timeString;
+
+            // Se a contagem chegar a zero, exibe uma mensagem
+            if (distance < 0) {
+                clearInterval(countdownInterval);
+                document.getElementById("countdown").innerHTML = "Contagem finalizada!";
+                document.title = "Contagem finalizada!";
+            }
+        }, 1000);
+    }
+
+    function updateClock() {
+        const now = new Date();
+        
+        // Hora
+        const hour = now.getHours() % 12;
+        const minute = now.getMinutes();
+        const second = now.getSeconds();
+
+        const hourDeg = (360 / 12) * hour + (360 / 12) * (minute / 60); // 360º para 12 horas
+        const minuteDeg = (360 / 60) * minute + (360 / 60) * (second / 60); // 360º para 60 minutos
+        const secondDeg = (360 / 60) * second; // 360º para 60 segundos
+
+        // Atualiza os ângulos dos ponteiros
+        document.getElementById("hour").style.transform = `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+        document.getElementById("minute").style.transform = `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
+        document.getElementById("second").style.transform = `translate(-50%, -100%) rotate(${secondDeg}deg)`;
+    }
+
+    // Atualiza o relógio analógico a cada segundo
+    clockInterval = setInterval(updateClock, 1000);
+    updateClock(); // Chama uma vez para iniciar imediatamente
+
+</script>
+
+</body>
+</html>
